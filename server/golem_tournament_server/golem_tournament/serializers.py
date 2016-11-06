@@ -1,14 +1,25 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from golem_tournament.models import Armor, Golem, Engine, Weapon
 
 
+class UserSerializer(serializers.ModelSerializer):
+    golems = serializers.PrimaryKeyRelatedField(many=True, queryset=Golem.objects.all())
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'golems')
+
+
 class GolemSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Golem
         fields = ('id',
                   'name',
                   'level',
                   'parts',
+                  'owner',
                   )
 
 

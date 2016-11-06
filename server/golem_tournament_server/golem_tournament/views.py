@@ -1,12 +1,43 @@
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import permissions
 from django.http import Http404
 from golem_tournament.models import Golem
-from golem_tournament.serializers import GolemSerializer
+from golem_tournament.serializers import GolemSerializer, UserSerializer
+from golem_tournament.permissions import IsOwnerOrReadOnly
+from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
+
+
+class UserList(APIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class UserDetail(APIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_object(self, username):
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, username):
+        print(username)
+        user = self.get_object(username)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
 
 class GolemList(APIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, format=None):
         golems = Golem.objects.all()
@@ -15,6 +46,8 @@ class GolemList(APIView):
 
 
 class GolemDetail(APIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly,)
 
     def get_object(self, pk):
         try:
@@ -23,7 +56,7 @@ class GolemDetail(APIView):
             raise Http404
 
     def get(self, request, pk):
-        self.get_object(pk)
+        golem = self.get_object(pk)
         serializer = GolemSerializer(golem)
         return Response(serializer.data)
 
@@ -42,6 +75,7 @@ class GolemDetail(APIView):
 
 
 class GolemCreator(APIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def post(self, request):
         serializer = GolemSerializer(data=request.data)
