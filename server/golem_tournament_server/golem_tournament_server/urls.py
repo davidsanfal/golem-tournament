@@ -20,6 +20,4 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('golem_tournament.urls')),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    url(r'^admin/', include(admin.site.urls)),
-
 ]

@@ -3,16 +3,27 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import permissions
+from rest_framework import permissions, generics
 from django.http import Http404
 from golem_tournament.models import Golem
 from golem_tournament.serializers import GolemSerializer, UserSerializer
-from golem_tournament.permissions import IsOwnerOrReadOnly
+from golem_tournament.permissions import IsOwnerOrReadOnly, IsAuthenticatedOrCreate
 from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 
+class SignUp(APIView):
+    permission_classes = (IsAuthenticatedOrCreate,)
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.create_user(**request.data)
+            return Response({'username': serializer.data['username']},
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserList(APIView):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, format=None):
         users = User.objects.all()
@@ -21,7 +32,7 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self, username):
         try:

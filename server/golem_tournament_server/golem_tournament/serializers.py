@@ -4,11 +4,12 @@ from golem_tournament.models import Armor, Golem, Engine, Weapon
 
 
 class UserSerializer(serializers.ModelSerializer):
-    golems = serializers.PrimaryKeyRelatedField(many=True, queryset=Golem.objects.all())
+    golems = serializers.PrimaryKeyRelatedField(many=True, queryset=Golem.objects.all(), default=[])
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'golems')
+        fields = ('id', 'username', 'password', 'golems')
+        write_only_fields = ('password',)
 
 
 class GolemSerializer(serializers.ModelSerializer):
