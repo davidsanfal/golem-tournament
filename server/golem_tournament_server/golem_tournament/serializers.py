@@ -11,6 +11,18 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password', 'golems')
         write_only_fields = ('password',)
 
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+    def to_representation(self, obj):
+        return {'username': obj.username}
+
 
 class GolemSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -18,10 +30,18 @@ class GolemSerializer(serializers.ModelSerializer):
         model = Golem
         fields = ('id',
                   'name',
-                  'level',
-                  'parts',
+                  'golem_type',
                   'owner',
                   )
+
+    def to_representation(self, obj):
+        return {
+            'name': obj.name,
+            'golem_type': obj.golem_type,
+            'owner': obj.owner.username,
+            'equip': obj.equipment,
+
+        }
 
 
 class EngineSerializer(serializers.ModelSerializer):

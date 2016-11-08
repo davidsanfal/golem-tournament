@@ -47,13 +47,18 @@ class Golem(models.Model):
     def equip_item(self, part):
         setattr(self, part.part_type, part.id)
 
+    @property
     def equipment(self):
-        return {'engine': Engine.objects.get(pk=self.engine),
-                'weapons': {'right': Weapon.objects.get(pk=self.right_weapon),
-                            'left': Weapon.objects.get(pk=self.right_weapon)},
-                'armors': {'right_leg': Armor.objects.get(pk=self.right_leg),
-                           'left_leg': Armor.objects.get(pk=self.left_leg),
-                           'right_arm': Armor.objects.get(pk=self.right_arm),
-                           'left_arm': Armor.objects.get(pk=self.left_arm),
-                           'cabin': Armor.objects.get(pk=self.cabin),
-                           'head': Armor.objects.get(pk=self.head)}}
+        return {'engine': self._get_item(Engine, self.engine),
+                'weapons': {'right': self._get_item(Weapon, self.right_weapon),
+                            'left': self._get_item(Weapon, self.right_weapon)},
+                'armors': {'right_leg': self._get_item(Armor, self.right_leg),
+                           'left_leg': self._get_item(Armor, self.left_leg),
+                           'right_arm': self._get_item(Armor, self.right_arm),
+                           'left_arm': self._get_item(Armor, self.left_arm),
+                           'cabin': self._get_item(Armor, self.cabin),
+                           'helm': self._get_item(Armor, self.helm)}}
+
+    @staticmethod
+    def _get_item(part, pk):
+        return part.objects.get(pk=pk) if pk else None

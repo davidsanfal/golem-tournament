@@ -16,9 +16,8 @@ class SignUp(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = User.objects.create_user(**request.data)
-            return Response({'username': serializer.data['username']},
-                            status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -62,7 +61,7 @@ class GolemDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return Snippet.objects.get(pk=pk)
+            return Golem.objects.get(pk=pk)
         except Snippet.DoesNotExist:
             raise Http404
 
@@ -89,8 +88,9 @@ class GolemCreator(APIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def post(self, request):
+        print(request.user.id)
         serializer = GolemSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
