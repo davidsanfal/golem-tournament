@@ -39,7 +39,7 @@ class GolemSerializer(serializers.ModelSerializer):
             'name': obj.name,
             'golem_type': obj.golem_type,
             'owner': obj.owner.username,
-            'equip': obj.equipment,
+            'equipment': obj.equipment,
 
         }
 
