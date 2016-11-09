@@ -89,3 +89,15 @@ ENV/
 .ropeproject
 
 db.sqlite3
+
+### Angular2 ###
+
+system-config.js*
+app/**/*.js
+app/**/*.map
+node_modules
+jspm_packages
+bower_components
+aot/*
+dist/*
+yarn.lock
